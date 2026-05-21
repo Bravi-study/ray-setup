@@ -1,0 +1,43 @@
+# Локальная эмуляция продакшн-развертывания Ray-кластера и FastAPI-клиента.
+# Для надежного локального масштабирования worker-узлов используйте:
+# docker compose up --build --scale ray-worker=2
+
+services:
+  ray-head:
+    build:
+      context: ./ray_cluster
+    command:
+      [
+        "ray",
+        "start",
+        "--head",
+        "--port=6379",
+        "--dashboard-host=0.0.0.0",
+        "--num-cpus=0",
+        "--block"
+      ]
+    ports:
+      - "8265:8265"
+      - "10001:10001"
+    shm_size: "2gb"
+
+  ray-worker:
+    build:
+      context: ./ray_cluster
+    command: ["ray", "start", "--address=ray-head:6379", "--block"]
+    depends_on:
+      - ray-head
+    shm_size: "2gb"
+    deploy:
+      replicas: 2
+
+  fastapi-app:
+    build:
+      context: ./fastapi_client
+    environment:
+      # Значение приводится приложением к формату ray://ray-head:10001.
+      RAY_ADDRESS: ray-head
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ray-head

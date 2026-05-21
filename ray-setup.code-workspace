@@ -1,0 +1,65 @@
+{
+    "folders": [
+        {
+            "name": "ray-setup",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "terminal.integrated.cwd": "${workspaceFolder}",
+        "terminal.integrated.env.osx": {
+            "PYTHONPATH": "${workspaceFolder}/.venv/bin/python"
+        },
+        "python.analysis.indexing": true,
+        "python.analysis.autoImportCompletions": true,
+        "python.analysis.extraPaths": [
+            "${workspaceFolder}/ray-setup/src",
+            "${workspaceFolder}/.venv/lib/",
+            "${workspaceFolder}/.venv/lib/python3.12/",
+            "${workspaceFolder}/.venv/lib/python3.12/site-packages/"
+        ],
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python3.12",
+        "python.terminal.activateEnvironment": true,
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "[python]": {
+            "editor.defaultFormatter": "charliermarsh.ruff"
+        },
+        "ruff.enable": true,
+        "ruff.lint.enable": true,
+        "ruff.organizeImports": true,
+        "ruff.importStrategy": "fromEnvironment",
+        "ruff.lineLength": 120,
+        "ruff.trace.server": "messages",
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "modificationsIfAvailable",
+        "editor.rulers": [
+            120
+        ],
+        "python.testing.pytestArgs": [
+            "${workspaceFolder}/tests",
+            "-v"
+        ]
+    },
+    "launch": {
+        "version": "0.1.0",
+        "configurations": [
+            {
+                "name": "rwp",
+                "type": "debugpy",
+                "request": "launch",
+                "module": "uvicorn",
+                "args": [
+                    "app:app",
+                    "--host",
+                    "0.0.0.0",
+                    "--port",
+                    "8081",
+                    "--log-level",
+                    "debug"
+                    // "--reload",
+                ],
+                "jinja": true
+            }
+        ]
+    }
+}

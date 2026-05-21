@@ -1,0 +1,17 @@
+[project]
+name = "fastapi-ray-client"
+version = "0.1.0"
+description = "FastAPI-сервис, который делегирует тяжелые задачи в Ray-кластер"
+requires-python = ">=3.12"
+
+# Приложение само ничего тяжелого не считает локально, а только общается с Ray.
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "uvicorn>=0.30,<1.0",
+    "ray[client]==2.37.0",
+    "pandas>=2.2,<3.0",
+]
+
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"

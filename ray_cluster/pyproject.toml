@@ -1,0 +1,16 @@
+[project]
+name = "ray-cluster-runtime"
+version = "0.1.0"
+description = "Базовый runtime-образ для head и worker узлов Ray"
+requires-python = ">=3.12"
+
+# Зависимости ставятся только через uv и фиксируются в uv.lock.
+dependencies = [
+    "ray[default]==2.37.0",
+    "pandas>=2.2,<3.0",
+    "scikit-learn>=1.5,<2.0",
+]
+
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
