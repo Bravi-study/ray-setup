@@ -62,7 +62,8 @@ async def connect_to_ray(address: str, max_attempts: int = 20, delay_seconds: fl
 
 async def fan_out(submitted_refs: list[Any], timeout: float = RAY_WAIT_TIMEOUT_SECONDS) -> FanoutResult:
     """Собирает завершившиеся Ray задачи по мере готовности через чистый asyncio."""
-    pending_tasks = {asyncio.ensure_future(ref): index for index, ref in enumerate(submitted_refs)}
+    pending_tasks = {asyncio.ensure_future(ref): (index, ref) for index, ref in enumerate(submitted_refs)}
+
     completed_order: list[int] = []
     completed_pairs: list[tuple[int, Any]] = []
 
@@ -73,14 +74,21 @@ async def fan_out(submitted_refs: list[Any], timeout: float = RAY_WAIT_TIMEOUT_S
             return_when=asyncio.FIRST_COMPLETED,
         )
         if not done_tasks:
-            for task in pending_tasks:
+            for task, (ready_index, original_ref) in pending_tasks.items():
+                # Отменяем ожидание на стороне FastAPI
                 task.cancel()
+
+                # Убиваем задачу на воркере Ray физически (force=True убивает даже зависший процесс)
+                try:
+                    ray.cancel(original_ref, force=True)
+                except Exception as e:
+                    print(f"Warning: could not cancel task {ready_index}: {e}")
 
             await asyncio.gather(*pending_tasks, return_exceptions=True)
             raise TimeoutError("Истекло время ожидания при распределении задач.")
 
         for task in done_tasks:
-            ready_index = pending_tasks.pop(task)
+            ready_index, _ = pending_tasks.pop(task)
             ready_result = await task
             completed_order.append(ready_index)
             completed_pairs.append((ready_index, ready_result))
