@@ -15,7 +15,7 @@ RAY_WAIT_TIMEOUT_SECONDS = 10
 class FanoutResult:
     """Хранит результат fan-out/fan-in с порядком завершения и порядком отправки."""
 
-    submitted_refs: list[Any]
+    submitted_refs: list[ray.ObjectRef]
     completed_order: list[int]
     completed_results: list[Any]
     ordered_results: list[Any]
@@ -60,7 +60,7 @@ async def connect_to_ray(address: str, max_attempts: int = 20, delay_seconds: fl
     raise RuntimeError(f"Не удалось подключиться к Ray по адресу {address}: {last_error}")
 
 
-async def fan_out(submitted_refs: list[Any], timeout: float = RAY_WAIT_TIMEOUT_SECONDS) -> FanoutResult:
+async def fan_out(submitted_refs: list[ray.ObjectRef], timeout: float = RAY_WAIT_TIMEOUT_SECONDS) -> FanoutResult:
     """Собирает завершившиеся Ray задачи по мере готовности через чистый asyncio."""
     pending_tasks = {asyncio.ensure_future(ref): (index, ref) for index, ref in enumerate(submitted_refs)}
 
@@ -111,4 +111,6 @@ async def run_chain(initial_value: Any, steps: list[Any]) -> Any:
         # Ray разрешит ObjectRef на стороне следующего воркера без возврата данных в FastAPI.
         current_value = step.remote(current_value)
 
-    return await current_value
+    result = await current_value
+
+    return result

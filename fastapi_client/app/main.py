@@ -219,7 +219,7 @@ async def predict_fanout(payload: PredictRequest) -> PredictFanoutResponse:
     """Отправляет строки в Ray по отдельности и показывает fan-out/fan-in паттерн."""
     validate_matrix_rows(payload.rows)
 
-    row_refs = [aggregate_row.remote(row, row_index) for row_index, row in enumerate(payload.rows)]
+    row_refs: list[ray.ObjectRef] = [aggregate_row.remote(row, row_index) for row_index, row in enumerate(payload.rows)]
 
     # FanoutResult одновременно показывает порядок завершения задач и детерминированный итоговый порядок.
     try:
